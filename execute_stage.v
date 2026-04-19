@@ -1,5 +1,11 @@
 `default_nettype none
 
+//Inputs, wires, outputs
+//_in : input either from previous or later stage
+//_out : outputs from the current stage's pipeline register 
+// _w : wires , variables created in stage
+// no suffix : anything that 'dies' in this stage (will not be input to any stage or pipeline register) (could be a wire or input type)
+
 module execute_stage(
     input clk, rst,
     input jalr, jump, branch, bgef3, ALUSrc,
@@ -10,17 +16,17 @@ module execute_stage(
     input [1:0] resultSrc_in,
     input [4:0] rs1_in, rs2_in, rd_in,
 
-    output [31:0] ALU_result_r, jump_target_r, instruction_r, PC_r, rs2_val_r,
-    output PCSel_r, memRead_r, memWrite_r, regWrite_r,
-    output [1:0] resultSrc_r,
-    output [4:0] rs1_r, rs2_r, rd_r
+    output [31:0] ALU_result_out, jump_target_out, instruction_out, PC_out, rs2_val_out,
+    output PCSel_out, memRead_out, memWrite_out, regWrite_out,
+    output [1:0] resultSrc_out,
+    output [4:0] rs1_out, rs2_out, rd_out
 
 );
-//Inputs, wires, outputs
 
 
-wire [31:0] ALU_in_A, ALU_in_B, ALU_result_out, jump_target_out;
-wire PCSel_out, zero, negative, condition_met, ALUSrc_jal;
+
+wire [31:0] ALU_in_A, ALU_in_B, ALU_result_w, jump_target_w;
+wire PCSel_w, zero, negative, condition_met, ALUSrc_jal;
 
 
 
@@ -29,32 +35,32 @@ assign ALUSrc_jal = (jump && !jalr); //to handle branch calculations in ALU, cho
 
 mux_2x1 ALU_A_mux(.a(rs1_val), .b(PC_in), .s(ALUSrc_jal), .f(ALU_in_A)); // rs1 vs PC for ALU input A
 mux_2x1 ALU_B_mux(.a(rs2_val_in), .b(immediate), .s(ALUSrc), .f(ALU_in_B)); //rs2 vs immediate for ALU input B
+ALU alu_(.A(ALU_in_A), .B(ALU_in_B), .ALUControl(ALUControl), .result(ALU_result_w), .zero(zero), .negative(negative) );
 
-ALU alu_(.A(ALU_in_A), .B(ALU_in_B), .ALUControl(ALUControl), .result(ALU_result_out), .zero(zero), .negative(negative) );
 //Branch and jump logic  -> || && ! single bit , | & ~ multibit
-mux_2x1 branch_jump_mux(.a(immediate), .b(ALU_result_out), .s(jalr), .f(jump_target_out));
+mux_2x1 branch_jump_mux(.a(immediate), .b(ALU_result_w), .s(jalr), .f(jump_target_w));
 assign condition_met = (bgef3)? (!negative || zero) : !zero;
-assign PCSel_out = ((branch && condition_met || jump));
+assign PCSel_w = ((branch && condition_met || jump));
 
 
 
 EX_MEM pipe_reg( 
     .clk(clk), .rst(rst),
-    .ALU_result_r(ALU_result_out), 
-    .jump_target_r(jump_target_out), 
+    .ALU_result_r(ALU_result_w), 
+    .jump_target_r(jump_target_w), 
     .instruction_r(instruction_in),
     .PC_r(PC_in),                   
-    .PCSel_r(PCSel_out), 
+    .PCSel_r(PCSel_w), 
     .memRead_r(memRead_in), 
     .memWrite_r(memWrite_in), 
     .regWrite_r(regWrite_in), 
     .resultSrc_r(resultSrc_in),
     .rs1_r(rs1_in), .rs2_r(rs2_in), .rd_r(rd_in), .rs2_val_r(rs2_val_in),
     
-    .ALU_result(ALU_result_r), .jump_target(jump_target_r), .instruction(instruction_r), 
-    .PC(PC_r), .PCSel(PCSel_r), .memRead(memRead_r), .memWrite(memWrite_r), 
-    .regWrite(regWrite_r), .resultSrc(resultSrc_r), .rs1(rs1_r), .rs2(rs2_r), 
-    .rd(rd_r), .rs2_val(rs2_val_r)
+    .ALU_result(ALU_result_out), .jump_target(jump_target_out), .instruction(instruction_out), 
+    .PC(PC_out), .PCSel(PCSel_out), .memRead(memRead_out), .memWrite(memWrite_out), 
+    .regWrite(regWrite_out), .resultSrc(resultSrc_out), .rs1(rs1_out), .rs2(rs2_out), 
+    .rd(rd_out), .rs2_val(rs2_val_out)
 );
 
 

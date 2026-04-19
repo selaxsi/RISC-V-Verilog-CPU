@@ -1,81 +1,88 @@
 `default_nettype none
 `timescale 1ns/1ps
-module decode_stage( clk, rst, regWrite_in, instruction, PC, WB_result, rd_in,
- PC_r, instruction_r, ALUSrc_r, memRead_r, memWrite_r, jalr_r, jump_r, branch_r, regWrite_r,
- resultSrc_r , ALUControl_r, immediate_r, rs1_val_r, rs2_val_r, bgef3_r, rs1_r, rs2_r, rd_r //25 parameters
+
+//Naming convention:
+//_in : input either from previous or later stage
+//_out : outputs from the current stage's pipeline register 
+// _w : wires , variables created in stage
+// no suffix : anything that 'dies' in this stage (will not be input to any stage or pipeline register) (could be a wire or input type)
+// _r : input parameters of the pipeline registers, connect _w or _in to them
+
+module decode_stage( clk, rst, regWrite_in, instruction_in, PC_in, WB_result, rd_in,
+ PC_out, instruction_out, ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out,
+ resultSrc_out , ALUControl_out, immediate_out, rs1_val_out, rs2_val_out, bgef3_out, rs1_out, rs2_out, rd_out //25 parameters
 );
-//_out = written to pipeline register
-// _r = output from pipeline register
+
 
 input clk,rst, regWrite_in;
 input [4:0] rd_in; //for writing to reg from prev instruction
-input [31:0] instruction, PC, WB_result;
+input [31:0] instruction_in, PC_in, WB_result;
 
-wire ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out; 
-wire [1:0] ALUOp, resultSrc_out, immSrc;
-wire [3:0] ALUControl_out;
-wire [31:0] immediate_out, rs1_val_out, rs2_val_out;
-wire [4:0] rs1_out, rs2_out, rd_out;
+wire ALUSrc_w, memRead_w, memWrite_w, jalr_w, jump_w, branch_w, regWrite_w; 
+wire [1:0] ALUOp, resultSrc_w, immSrc;
+wire [3:0] ALUControl_w;
+wire [31:0] immediate_w, rs1_val_w, rs2_val_w;
+wire [4:0] rs1_w, rs2_w, rd_w;
 
 
-output [31:0] PC_r, instruction_r;
-output ALUSrc_r, memRead_r, memWrite_r, jalr_r, jump_r, branch_r, regWrite_r;
-output [1:0] resultSrc_r;
-output [3:0] ALUControl_r;
-output [31:0] immediate_r, rs1_val_r, rs2_val_r;
-output bgef3_r; // = msb of funct3
-output [4:0] rs1_r, rs2_r, rd_r;
+output [31:0] PC_out, instruction_out;
+output ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out;
+output [1:0] resultSrc_out;
+output [3:0] ALUControl_out;
+output [31:0] immediate_out, rs1_val_out, rs2_val_out;
+output bgef3_out; // = msb of funct3
+output [4:0] rs1_out, rs2_out, rd_out;
 
-assign rs1_out = instruction[19:15];
-assign rs2_out = instruction[24:20];
-assign rd_out  = instruction[11:7];
+assign rs1_w = instruction_in[19:15];
+assign rs2_w = instruction_in[24:20];
+assign rd_w  = instruction_in[11:7];
 
 control_unit CU(
-    .opcode(instruction[6:0]),
-    .funct3(instruction[14:12]),
-    .funct7(instruction[31:25]),
-    .ALUSrc(ALUSrc_out),
+    .opcode(instruction_in[6:0]),
+    .funct3(instruction_in[14:12]),
+    .funct7(instruction_in[31:25]),
+    .ALUSrc(ALUSrc_w),
     .ALUOp(ALUOp),
-    .memRead(memRead_out),
-     .memWrite(memWrite_out),
-     .jalr(jalr_out), 
-     .jump(jump_out),
-     .branch(branch_out), 
-     .regWrite(regWrite_out),
+    .memRead(memRead_w),
+     .memWrite(memWrite_w),
+     .jalr(jalr_w), 
+     .jump(jump_w),
+     .branch(branch_w), 
+     .regWrite(regWrite_w),
      .immSrc(immSrc)
 
 );
 
-imm_gen IMM( .inst(instruction), .immSrc(immSrc), 
-.immediate(immediate_out)
+imm_gen IMM( .inst(instruction_in), .immSrc(immSrc), 
+.immediate(immediate_w)
 );
 
 register_file RF(
 .clk(clk), .rst(rst), .regWrite(regWrite_in),
-.rs1(rs1_out), .rs2(rs2_out), .rd(rd_in), .WB_result(WB_result),
-.rs1_val(rs1_val_out), .rs2_val(rs2_val_out)
+.rs1(rs1_w), .rs2(rs2_w), .rd(rd_in), .WB_result(WB_result),
+.rs1_val(rs1_val_w), .rs2_val(rs2_val_w)
 );
 
 ALU_control ALUControl(
-    .funct3(instruction[14:12]),
-    .funct7(instruction[31:25]),
+    .funct3(instruction_in[14:12]),
+    .funct7(instruction_in[31:25]),
     .ALUOp(ALUOp),
-    .ALUControl(ALUControl_out)
+    .ALUControl(ALUControl_w)
 
 );
 
 ID_EX pipe_reg (
-    .clk(clk), .rst(rst), .PC_r(PC), .instruction_r(instruction),
-    .ALUSrc_r(ALUSrc_out), .memRead_r(memRead_out), .memWrite_r(memWrite_out),
-    .jalr_r(jalr_out), .jump_r(jump_out), .branch_r(branch_out), .regWrite_r(regWrite_out),
-    .resultSrc_r(resultSrc_out), .ALUControl_r(ALUControl_out), 
-    .immediate_r(immediate_out), .rs1_val_r(rs1_val_out), .rs2_val_r(rs2_val_out),
-    .bgef3_r(instruction[14]), .rs1_r(instruction[19:15]), .rs2_r(instruction[24:20]), .rd_r(instruction[11:7]),
+    .clk(clk), .rst(rst), .PC_r(PC_in), .instruction_r(instruction_in),
+    .ALUSrc_r(ALUSrc_w), .memRead_r(memRead_w), .memWrite_r(memWrite_w),
+    .jalr_r(jalr_w), .jump_r(jump_w), .branch_r(branch_w), .regWrite_r(regWrite_w),
+    .resultSrc_r(resultSrc_w), .ALUControl_r(ALUControl_w), 
+    .immediate_r(immediate_w), .rs1_val_r(rs1_val_w), .rs2_val_r(rs2_val_w),
+    .bgef3_r(instruction_in[14]), .rs1_r(rs1_w), .rs2_r(rs2_w), .rd_r(rd_w),
     
-    .PC(PC_r), .instruction(instruction_r) , .ALUSrc(ALUSrc_r), .memRead(memRead_r), 
-    .memWrite(memWrite_r), .jalr(jalr_r), .jump(jump_r), .branch(branch_r), .regWrite(regWrite_r),
-    .resultSrc(resultSrc_r), .ALUControl(ALUControl_r), .immediate(immediate_r), 
-    .rs1_val(rs1_val_r), .rs2_val(rs2_val_r), .bgef3(bgef3_r), .rs1(rs1_r), .rs2(rs2_r), .rd(rd_r)
+    .PC(PC_out), .instruction(instruction_out) , .ALUSrc(ALUSrc_out), .memRead(memRead_out), 
+    .memWrite(memWrite_out), .jalr(jalr_out), .jump(jump_out), .branch(branch_out), .regWrite(regWrite_out),
+    .resultSrc(resultSrc_out), .ALUControl(ALUControl_out), .immediate(immediate_out), 
+    .rs1_val(rs1_val_out), .rs2_val(rs2_val_out), .bgef3(bgef3_out), .rs1(rs1_out), .rs2(rs2_out), .rd(rd_out)
 );
 
 

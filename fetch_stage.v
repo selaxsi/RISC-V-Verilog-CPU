@@ -1,34 +1,39 @@
 `default_nettype none
 
+//Naming convention:
+//_in : input either from previous or later stage
+//_out : outputs from the current stage's pipeline register 
+// _w : wires , variables created in stage
+// no suffix : anything that 'dies' in this stage (will not be input to any stage or pipeline register) (could be a wire or input type)
+// _r : input parameters of the pipeline registers, connect _w or _in to them
 
-
-module fetch_stage(clk, rst, PCSel, jump_target, PC_r, instruction_r);
+module fetch_stage(clk, rst, PCSel, jump_target, PC_out, instruction_out);
     input clk, rst, PCSel; //PCSel generated at EX stage = (branch && condition || jump )
     input [31:0] jump_target;
-    wire [31:0] PC_out, instruction_out;
-    output [31:0] PC_r, instruction_r;
+    wire [31:0] PC_w, instruction_w;
+    output [31:0] PC_out, instruction_out;
 
-    wire [31:0] pc_plus_4;
-    wire [31:0] next_pc_val;
+    wire [31:0] PC_plus_4;
+    wire [31:0] next_PC_val;
 
-   adder adder_4(.a(PC_out), .b(32'd4), .f(pc_plus_4));
+   adder adder_4(.a(PC_w), .b(32'd4), .f(PC_plus_4));
 
-    mux_2x1 mux(.a(pc_plus_4), .b(jump_target), .s(PCSel), .f(next_pc_val));
+    mux_2x1 mux(.a(PC_plus_4), .b(jump_target), .s(PCSel), .f(next_PC_val));
   
     program_counter PC_Reg (
         .clk(clk),
         .rst(rst),
-        .PC_mux_output(next_pc_val),
-        .PC(PC_out)
+        .PC_mux_output(next_PC_val),
+        .PC(PC_w)
     );
 
     instruction_memory IM (
-        .PC(PC_out),
-        .instruction(instruction_out)
+        .PC(PC_w),
+        .instruction(instruction_w)
     );
 
-    IF_ID IFID(.clk(clk), .rst(rst), .pc_in(PC_out)
-    , .instr_in(instruction_out), .instr(instruction_r), .pc(PC_r) );
+    IF_ID IFID(.clk(clk), .rst(rst), .PC_r(PC_w)
+    , .instr_r(instruction_w), .instr(instruction_out), .PC(PC_out) );
 
 endmodule
 
@@ -75,23 +80,23 @@ end
 endmodule
 
 
-module IF_ID(clk, rst, pc_in, instr_in, pc, instr);
+module IF_ID(clk, rst, PC_r, instr_r, PC, instr);
 
 input wire clk, rst;
-input wire [31:0] pc_in , instr_in;
+input wire [31:0] PC_r , instr_r;
 
-output reg [31:0] instr, pc;
+output reg [31:0] instr, PC;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
            
-            pc <= 32'b0; 
+            PC <= 32'b0; 
             instr <= 32'b0; 
         end
 
         else begin
-            pc <= pc_in;
-            instr <= instr_in;
+            PC <= PC_r;
+            instr <= instr_r;
         end
     end
 
