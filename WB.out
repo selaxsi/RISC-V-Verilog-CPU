@@ -1,0 +1,101 @@
+#! /usr/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/system.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2005_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/va_math.vpi";
+S_0x56f98bee5090 .scope module, "WB_tb" "WB_tb" 2 4;
+ .timescale -9 -12;
+v0x56f98befe5a0_0 .var "ALU_result_in", 31 0;
+v0x56f98befe680_0 .var "PC_plus_4_in", 31 0;
+v0x56f98befe720_0 .net "WB_result_out", 31 0, L_0x56f98bf0f370;  1 drivers
+v0x56f98befe7c0_0 .var "mem_result_in", 31 0;
+v0x56f98befe890_0 .var "rd_in", 4 0;
+v0x56f98befe930_0 .net "rd_out", 4 0, L_0x56f98bf0f6a0;  1 drivers
+v0x56f98befea00_0 .var "regWrite_in", 0 0;
+v0x56f98befead0_0 .net "regWrite_out", 0 0, L_0x56f98bf0f590;  1 drivers
+v0x56f98befeba0_0 .var "resultSrc_in", 1 0;
+S_0x56f98bee5220 .scope module, "uut" "wb_stage" 2 15, 3 3 0, S_0x56f98bee5090;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 32 "ALU_result_in";
+    .port_info 1 /INPUT 32 "mem_result_in";
+    .port_info 2 /INPUT 32 "PC_plus_4_in";
+    .port_info 3 /INPUT 2 "resultSrc_in";
+    .port_info 4 /INPUT 1 "regWrite_in";
+    .port_info 5 /INPUT 5 "rd_in";
+    .port_info 6 /OUTPUT 32 "WB_result_out";
+    .port_info 7 /OUTPUT 1 "regWrite_out";
+    .port_info 8 /OUTPUT 5 "rd_out";
+L_0x56f98bf0f590 .functor BUFZ 1, v0x56f98befea00_0, C4<0>, C4<0>, C4<0>;
+L_0x56f98bf0f6a0 .functor BUFZ 5, v0x56f98befe890_0, C4<00000>, C4<00000>, C4<00000>;
+v0x56f98bed3cc0_0 .net "ALU_result_in", 31 0, v0x56f98befe5a0_0;  1 drivers
+v0x56f98befd610_0 .net "PC_plus_4_in", 31 0, v0x56f98befe680_0;  1 drivers
+v0x56f98befd6f0_0 .net "WB_result_out", 31 0, L_0x56f98bf0f370;  alias, 1 drivers
+L_0x7d6f6ba9d018 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0x56f98befd7b0_0 .net/2u *"_ivl_0", 1 0, L_0x7d6f6ba9d018;  1 drivers
+v0x56f98befd890_0 .net *"_ivl_10", 0 0, L_0x56f98befeee0;  1 drivers
+L_0x7d6f6ba9d0f0 .functor BUFT 1, C4<00000000000000000000000000000000>, C4<0>, C4<0>, C4<0>;
+v0x56f98befd9a0_0 .net/2u *"_ivl_12", 31 0, L_0x7d6f6ba9d0f0;  1 drivers
+v0x56f98befda80_0 .net *"_ivl_14", 31 0, L_0x56f98bf0eff0;  1 drivers
+v0x56f98befdb60_0 .net *"_ivl_16", 31 0, L_0x56f98bf0f1e0;  1 drivers
+v0x56f98befdc40_0 .net *"_ivl_2", 0 0, L_0x56f98befeca0;  1 drivers
+L_0x7d6f6ba9d060 .functor BUFT 1, C4<01>, C4<0>, C4<0>, C4<0>;
+v0x56f98befdd00_0 .net/2u *"_ivl_4", 1 0, L_0x7d6f6ba9d060;  1 drivers
+v0x56f98befdde0_0 .net *"_ivl_6", 0 0, L_0x56f98befedc0;  1 drivers
+L_0x7d6f6ba9d0a8 .functor BUFT 1, C4<10>, C4<0>, C4<0>, C4<0>;
+v0x56f98befdea0_0 .net/2u *"_ivl_8", 1 0, L_0x7d6f6ba9d0a8;  1 drivers
+v0x56f98befdf80_0 .net "mem_result_in", 31 0, v0x56f98befe7c0_0;  1 drivers
+v0x56f98befe060_0 .net "rd_in", 4 0, v0x56f98befe890_0;  1 drivers
+v0x56f98befe140_0 .net "rd_out", 4 0, L_0x56f98bf0f6a0;  alias, 1 drivers
+v0x56f98befe220_0 .net "regWrite_in", 0 0, v0x56f98befea00_0;  1 drivers
+v0x56f98befe2e0_0 .net "regWrite_out", 0 0, L_0x56f98bf0f590;  alias, 1 drivers
+v0x56f98befe3a0_0 .net "resultSrc_in", 1 0, v0x56f98befeba0_0;  1 drivers
+L_0x56f98befeca0 .cmp/eq 2, v0x56f98befeba0_0, L_0x7d6f6ba9d018;
+L_0x56f98befedc0 .cmp/eq 2, v0x56f98befeba0_0, L_0x7d6f6ba9d060;
+L_0x56f98befeee0 .cmp/eq 2, v0x56f98befeba0_0, L_0x7d6f6ba9d0a8;
+L_0x56f98bf0eff0 .functor MUXZ 32, L_0x7d6f6ba9d0f0, v0x56f98befe680_0, L_0x56f98befeee0, C4<>;
+L_0x56f98bf0f1e0 .functor MUXZ 32, L_0x56f98bf0eff0, v0x56f98befe7c0_0, L_0x56f98befedc0, C4<>;
+L_0x56f98bf0f370 .functor MUXZ 32, L_0x56f98bf0f1e0, v0x56f98befe5a0_0, L_0x56f98befeca0, C4<>;
+    .scope S_0x56f98bee5090;
+T_0 ;
+    %vpi_call 2 28 "$dumpfile", "WB_tb.vcd" {0 0 0};
+    %vpi_call 2 29 "$dumpvars", 32'sb00000000000000000000000000000000, S_0x56f98bee5090 {0 0 0};
+    %pushi/vec4 111, 0, 32;
+    %store/vec4 v0x56f98befe5a0_0, 0, 32;
+    %pushi/vec4 222, 0, 32;
+    %store/vec4 v0x56f98befe7c0_0, 0, 32;
+    %pushi/vec4 333, 0, 32;
+    %store/vec4 v0x56f98befe680_0, 0, 32;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x56f98befea00_0, 0, 1;
+    %pushi/vec4 7, 0, 5;
+    %store/vec4 v0x56f98befe890_0, 0, 5;
+    %pushi/vec4 0, 0, 2;
+    %store/vec4 v0x56f98befeba0_0, 0, 2;
+    %delay 1000, 0;
+    %vpi_call 2 38 "$display", "ALU select   -> %d (expected 111)", v0x56f98befe720_0 {0 0 0};
+    %pushi/vec4 1, 0, 2;
+    %store/vec4 v0x56f98befeba0_0, 0, 2;
+    %delay 1000, 0;
+    %vpi_call 2 41 "$display", "MEM select   -> %d (expected 222)", v0x56f98befe720_0 {0 0 0};
+    %pushi/vec4 2, 0, 2;
+    %store/vec4 v0x56f98befeba0_0, 0, 2;
+    %delay 1000, 0;
+    %vpi_call 2 44 "$display", "PC+4 select  -> %d (expected 333)", v0x56f98befe720_0 {0 0 0};
+    %pushi/vec4 3, 0, 2;
+    %store/vec4 v0x56f98befeba0_0, 0, 2;
+    %delay 1000, 0;
+    %vpi_call 2 47 "$display", "Default      -> %d (expected 0)", v0x56f98befe720_0 {0 0 0};
+    %vpi_call 2 49 "$display", "WB pass-through rd=%0d regWrite=%b", v0x56f98befe930_0, v0x56f98befead0_0 {0 0 0};
+    %vpi_call 2 50 "$finish" {0 0 0};
+    %end;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "WB_tb.v";
+    "wb_stage.v";

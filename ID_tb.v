@@ -45,6 +45,8 @@ module ID_tb;
 
     initial 
     begin
+    $dumpfile("ID_tb.vcd");
+    $dumpvars(0, ID_tb);
         // Initialize everything
        
         clk = 0;
@@ -67,28 +69,63 @@ module ID_tb;
         instruction_in = 32'b00000000111100001000001000010100 ; //ANDI
         WB_result = 32'd100;        
       
-      
 
-        //  TEST AN ANDI INSTRUCTION ---
+        // I TYPE: andi (after WB)
         // andi  x4, x1, 15 
  
         repeat (2) @(posedge clk); 
         regWrite_prev = 0;
-
-
         
-        $display("--- Testing ANDI ---");
-        $display("Time: %t | Inst: %h | Imm: %d | rs1_val: %d |  RegWrite: %b, ALUControl = %b", 
+        $display("--- Testing andi  x4, x1, 15 after writing 100 into x1 ---");
+        $display("Time: %t | Inst: %h | Imm: %d | rs1_val: %d |  RegWrite: %b, ALUControl = %b\n", 
                  $time, instruction_in, immediate, rs1_val, regWrite, ALUControl);
 
-        //  TEST A BNE INSTRUCTION ---
+        // SB TYPE: bne
         // bne   x3, x5, l2    
         instruction_in = 32'b00000000010100011010010001100100; 
         repeat (2) @(posedge clk); 
     
-        $display("--- Testing BNE ---");
-        $display("Time: %t | Inst: %h | Branch: %b | Jump (jal or jalr): %b | rs2: %d | bgef3 = %b,  ALUControl = %b", 
+        $display("--- Testing bne   x3, x5, l2 ---");
+        $display("Time: %t | Inst: %h | Branch: %b | Jump (jal or jalr): %b | rs2: %d | bgef3 = %b,  ALUControl = %b\n", 
                  $time, instruction_in, branch, jump, rs2, bgef3,  ALUControl);
+
+        //  R TYPE: addw
+        // addw  x3, x1, x2
+        instruction_in = 32'h202091B4; 
+        repeat (2) @(posedge clk);
+        $display("--- Testing addw  x3, x1, x2---");
+        $display(" Time: %t | Inst: %h | ALUSrc: %b (0 for ALU wb) | ALUControl: %b | rs1: %d, rs2: %d, rd: %d\n", 
+                 $time, instruction_in, ALUSrc, ALUControl, rs1, rs2, rd);
+
+        // I TYPE Load: lw
+        // lw    x3, 0(x1)   
+        // Imm = 0
+        instruction_in = 32'h0000B194;
+        repeat (2) @(posedge clk);
+        $display("--- Testing lw    x3, 0(x1) ---");
+        $display("Time: %t | Inst: %h | memRead: %b | ResultSrc: %b | Imm: %d\n", $time, instruction_in, memRead, resultSrc, immediate);
+
+        // S TYPE: SW 
+        // sw    x2, 4(x1) 
+        instruction_in = 32'h0020B224;
+        repeat (2) @(posedge clk);
+        $display("--- Testing sw    x2, 4(x1)  ---");
+        $display("Time: %t | Inst: %h | memWrite: %b | Imm: %d | rs2_val (data to store): %d\n",  $time, instruction_in, memWrite, immediate, rs2_val);
+
+        // J TYPE: jal
+        // jal   x6, l1       
+        instruction_in = 32'h00C00370;
+        repeat (2) @(posedge clk);
+        $display("--- Testing jal   x6, l1  ---");
+        $display("Time: %t | Inst: %h | jump: %b | regWrite: %b | resultSrc: %b (10: wb PC+4)\n",  $time, instruction_in, jump, regWrite, resultSrc);
+
+
+        // R TYPE: sltu
+        //sltu  x10, x2, x1
+        instruction_in = 32'h02114534;
+        repeat (2) @(posedge clk);
+        $display("--- Testing SLTU  sltu  x10, x2, x1 ---");
+        $display("Time: %t | Inst: %h | ALUControl: %b, rs2_val %d",  $time, instruction_in, ALUControl, rs2_val);
 
         #20;
         $finish;

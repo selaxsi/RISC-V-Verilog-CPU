@@ -32,7 +32,7 @@ module fetch_stage(clk, rst, PCSel, jump_target, PC_out, instruction_out);
         .instruction(instruction_w)
     );
 
-    IF_ID IFID(.clk(clk), .rst(rst), .flush(PCSel), .PC_r(PC_w)
+    IF_ID IFID(.clk(clk), .rst(rst), .PC_r(PC_w)
         , .instr_r(instruction_w), .instr(instruction_out), .PC(PC_out) );
 
 endmodule
@@ -84,18 +84,14 @@ end
 
 endmodule
 
-module IF_ID(clk, rst, flush, PC_r, instr_r, PC, instr);
-input wire clk, rst, flush;
+module IF_ID(clk, rst, PC_r, instr_r, PC, instr);
+input wire clk, rst ;
 input wire [31:0] PC_r , instr_r;
 output reg [31:0] instr, PC;
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             PC <= 32'b0; 
             instr <= 32'b0;
-        end
-        else if (flush) begin   // flush: clear instruction but keep PC flow
-            PC <= PC_r;
-            instr <= 32'b0;     // insert NOP
         end
         else begin
             PC <= PC_r;

@@ -11,7 +11,10 @@ fetch_stage IF(.clk(clk), .rst(rst), .PCSel(PCSel), .jump_target(jump_target), .
 always #5 clk = ~clk;
 
  initial
- begin
+ begin  
+    $dumpfile("IF_tb.vcd");
+    $dumpvars(0, IF_tb);
+
   
   clk = 1;
   rst = 1;
@@ -29,5 +32,4 @@ always #5 clk = ~clk;
  end
 
 endmodule 
-// iverilog -o [outputfilename].out [filestocompile].v  //or *.v
-// vvp [outputfilename].out
+
