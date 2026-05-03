@@ -8,7 +8,7 @@
 // no suffix : anything that 'dies' in this stage (will not be input to any stage or pipeline register) (could be a wire or input type)
 // _r : input parameters of the pipeline registers, connect _w or _in to them
 
-module decode_stage( clk, rst, flush, regWrite_in, instruction_in, PC_in, WB_result, rd_in,
+module decode_stage( clk, rst, flush, stall, regWrite_in, instruction_in, PC_in, WB_result, rd_in,
  PC_out, instruction_out, ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out,
  resultSrc_out , ALUControl_out, immediate_out, rs1_val_out, rs2_val_out, bgef3_out, rs1_out, rs2_out, rd_out
 );
@@ -16,7 +16,7 @@ module decode_stage( clk, rst, flush, regWrite_in, instruction_in, PC_in, WB_res
 
 
 input clk,rst, regWrite_in;
-input flush;
+input flush, stall;
 input [4:0] rd_in; //for writing to reg from prev instruction
 input [31:0] instruction_in, PC_in, WB_result;
 
@@ -75,7 +75,7 @@ ALU_control ALUControl(
 );
 
 ID_EX pipe_reg (
-    .clk(clk), .rst(rst), .flush(flush), .PC_r(PC_in),
+    .clk(clk), .rst(rst), .flush(flush | stall), .PC_r(PC_in),
     .ALUSrc_r(ALUSrc_w), .memRead_r(memRead_w), .memWrite_r(memWrite_w),
     .jalr_r(jalr_w), .jump_r(jump_w), .branch_r(branch_w), .regWrite_r(regWrite_w),
     .resultSrc_r(resultSrc_w), .ALUControl_r(ALUControl_w), 

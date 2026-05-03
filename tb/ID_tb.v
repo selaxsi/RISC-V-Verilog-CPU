@@ -25,11 +25,13 @@ module ID_tb;
     wire bgef3;
     wire [4:0] rs1, rs2, rd;
 
+    wire [4:0] rs1_if, rs2_if;
     IF_ID pipe_reg (
-        .clk(clk), .rst(rst), .PC_r(PC_in), .instr_r(instruction_in), .PC(PC_r), .instr(instruction_r)
+        .clk(clk), .rst(rst), .stall(1'b0), .PC_r(PC_in), .instr_r(instruction_in), .PC(PC_r), .instr(instruction_r),
+        .rs1_out(rs1_if), .rs2_out(rs2_if)
     );
     decode_stage uut (
-        .clk(clk), .rst(rst), .flush(flush),
+        .clk(clk), .rst(rst), .flush(flush), .stall(1'b0),
         .regWrite_in(regWrite_prev), .rd_in(rd_in),
         .instruction_in(instruction_r), .PC_in(PC_r), .WB_result(WB_result),
         .instruction_out(instruction), .PC_out(PC), 
