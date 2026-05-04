@@ -7,15 +7,15 @@
 // no suffix : anything that 'dies' in this stage (will not be input to any stage or pipeline register) (could be a wire or input type)
 // _r : input parameters of the pipeline registers, connect _w or _in to them
 
-module fetch_stage(clk, rst, stall, PCSel, jump_target, PC_out, instruction_out, rs1_out, rs2_out);
-    input clk, rst, stall, PCSel; //PCSel generated at EX stage = (branch && condition || jump )
-    input [31:0] jump_target;
-    wire [31:0] PC_w, instruction_w;
-    output [4:0] rs1_out, rs2_out;
-    output [31:0] PC_out, instruction_out;
+module fetch_stage(
+    input clk, rst, stall, PCSel,
+    input [31:0] jump_target,
+    output [31:0] PC_out, instruction_out
+);
 
     wire [31:0] PC_plus_4;
     wire [31:0] next_PC_val;
+    wire [31:0] PC_w, instruction_w;
 
    adder adder_4(.a(PC_w), .b(32'd4), .f(PC_plus_4));
 
@@ -34,9 +34,9 @@ module fetch_stage(clk, rst, stall, PCSel, jump_target, PC_out, instruction_out,
         .instruction(instruction_w)
     );
 
-    IF_ID IFID(.clk(clk), .rst(rst), .stall(stall), .PC_r(PC_w)
-        , .instr_r(instruction_w), .instr(instruction_out), .PC(PC_out),
-        .rs1_out(rs1_out), .rs2_out(rs2_out));
+    assign PC_out = PC_w;
+    assign instruction_out = instruction_w;
+
 
 endmodule
 
@@ -57,7 +57,7 @@ initial
   for ( i = 0; i<16384; i = i+1)
     temp_mem[i] = 32'h00001014; // NOP = addiw x0, x0, 0
 
-  $readmemb("program.txt", temp_mem);
+  $readmemb("test/program.txt", temp_mem);
 
   for ( i = 0; i<16384; i = i+1) begin
     memory[i*4]   = temp_mem[i][7:0];
@@ -84,18 +84,23 @@ endmodule
     end
     endmodule
 
-    module IF_ID(clk, rst, stall, PC_r, instr_r, PC, instr, rs1_out, rs2_out);
-    input wire clk, rst, stall;
-    input wire [31:0] PC_r , instr_r;
-    output reg [31:0] instr, PC;
-    output wire [4:0] rs1_out, rs2_out;
-    assign rs1_out = instr_r[19:15];
-    assign rs2_out = instr_r[24:20];
+    module IF_ID(
+    input wire clk, rst, stall, flush,
+    input wire [31:0] PC_r , instr_r,
+    output reg [31:0] instr, PC
+
+      );
         always @(posedge clk or posedge rst) begin
             if (rst) begin
                 PC <= 32'b0; 
                 instr <= 32'b0; 
             end
+
+            else if (flush) begin
+                PC <= 32'b0;
+                instr <= 32'b0;
+            end
+
             else if (!stall) begin
                 PC <= PC_r;
                 instr <= instr_r;

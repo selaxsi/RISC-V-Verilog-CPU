@@ -31,8 +31,14 @@ module cpu(
         .instruction_out(instr_if_w)
     );
 
-    assign PC_fetch_out    = PC_if_w;
-    assign instr_fetch_out = instr_if_w;
+      wire [31:0] instr_ifid, PC_ifid;
+
+    IF_ID IFID(.clk(clk), .rst(rst), .stall(stall), .PC_r(PC_if_w)  , .flush(IFID_flush),
+        , .instr_r(instr_if_w), .instr(instr_ifid), .PC(PC_ifid),
+        .rs1_out(rs1_out), .rs2_out(rs2_out));
+
+    assign PC_fetch_out    = PC_ifid;
+    assign instr_fetch_out = instr_ifid;
 
     wire [31:0] PC_id_w, instr_id_w;
     wire ALUSrc_id_w, memRead_id_w, memWrite_id_w;

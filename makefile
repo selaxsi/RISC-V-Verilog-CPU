@@ -79,6 +79,13 @@ forward:
 	mv forwarding_tb.vcd $(SIM_DIR)/ 
 	$(VIEWER) $(SIM_DIR)/forwarding_tb.vcd &
 
+hazard:
+	mkdir -p $(SIM_DIR)
+	$(VERILOG) -o $(SIM_DIR)/hazard.out $(RTL_DIR)/hazard.v $(RTL_DIR)/shared_modules.v $(TB_DIR)/hazard_tb.v
+	$(SIM) $(SIM_DIR)/hazard.out
+	mv hazard_tb.vcd $(SIM_DIR)/ 
+
+
 # Clean sim folder
 clean:
 	rm -rf $(SIM_DIR)/*.out $(SIM_DIR)/*.vcd
