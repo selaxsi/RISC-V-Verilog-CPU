@@ -8,17 +8,28 @@
 // no suffix : anything that 'dies' in this stage (will not be input to any stage or pipeline register) (could be a wire or input type)
 // _r : input parameters of the pipeline registers, connect _w or _in to them
 
-module decode_stage( clk, rst, flush, stall, regWrite_in, instruction_in, PC_in, WB_result, rd_in,
- PC_out, instruction_out, ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out,
- resultSrc_out , ALUControl_out, immediate_out, rs1_val_out, rs2_val_out, bgef3_out, rs1_out, rs2_out, rd_out
+module decode_stage(
+    input clk,rst, regWrite_in,
+input flush, stall,
+input [4:0] rd_in, //for writing to reg from prev instruction
+input [31:0] instruction_in, PC_in, WB_result,
+
+output [31:0] PC_out, instruction_out,
+output ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out,
+output [1:0] resultSrc_out,
+output [3:0] ALUControl_out,
+output [31:0] immediate_out, rs1_val_out, rs2_val_out,
+output bgef3_out, // = msb of funct3
+output [4:0] rs1_out, rs2_out, rd_out,
+
+output [31:0] PC_early, imm_early,
+output branch_early, jump_early, jalr_early,
+output [4:0] rs1_early, rs2_early
+
+
 );
 
 
-
-input clk,rst, regWrite_in;
-input flush, stall;
-input [4:0] rd_in; //for writing to reg from prev instruction
-input [31:0] instruction_in, PC_in, WB_result;
 
 wire ALUSrc_w, memRead_w, memWrite_w, jalr_w, jump_w, branch_w, regWrite_w; 
 wire [1:0] ALUOp, resultSrc_w, immSrc;
@@ -26,14 +37,6 @@ wire [3:0] ALUControl_w;
 wire [31:0] immediate_w, rs1_val_w, rs2_val_w;
 wire [4:0] rs1_w, rs2_w, rd_w;
 
-
-output [31:0] PC_out, instruction_out;
-output ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out;
-output [1:0] resultSrc_out;
-output [3:0] ALUControl_out;
-output [31:0] immediate_out, rs1_val_out, rs2_val_out;
-output bgef3_out; // = msb of funct3
-output [4:0] rs1_out, rs2_out, rd_out;
 
 assign rs1_w = instruction_in[19:15];
 assign rs2_w = instruction_in[24:20];
@@ -73,6 +76,14 @@ ALU_control ALUControl(
     .ALUControl(ALUControl_w)
 
 );
+
+assign imm_early = immediate_w;
+assign branch_early = branch_w;
+assign jalr_early = jalr_w;
+assign jump_early = jump_w;
+assign rs1_early = rs1_w;
+assign rs2_early = rs2_w;
+assign PC_early = PC_in;
 
 ID_EX pipe_reg (
     .clk(clk), .rst(rst), .flush(flush | stall),
