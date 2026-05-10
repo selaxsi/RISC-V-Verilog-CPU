@@ -8,7 +8,7 @@
 // _r : input parameters of the pipeline registers, connect _w or _in to them
 
 module fetch_stage(
-    input clk, rst, stall, PCSel,
+    input clk, rst, stall, PCSel, flush,
     input [31:0] jump_target,
     output [31:0] PC_out, instruction_out
 );
@@ -34,11 +34,12 @@ module fetch_stage(
         .instruction(instruction_w)
     );
 
-    assign PC_out = PC_w;
-    assign instruction_out = instruction_w;
-
-
-endmodule
+    IF_ID IFID(
+            .clk(clk), .rst(rst), .stall(stall), .flush(flush),
+            .PC_r(PC_w), .instr_r(instruction_w),
+            .PC(PC_out), .instr(instruction_out)
+        );
+    endmodule
 
 module instruction_memory(PC, instruction); 
 

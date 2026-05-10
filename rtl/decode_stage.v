@@ -75,17 +75,21 @@ ALU_control ALUControl(
 );
 
 ID_EX pipe_reg (
-    .clk(clk), .rst(rst), .flush(flush | stall), .PC_r(PC_in),
+    .clk(clk), .rst(rst), .flush(flush | stall),
+    .PC_r(PC_in),
+    .instruction_r(instruction_in),
     .ALUSrc_r(ALUSrc_w), .memRead_r(memRead_w), .memWrite_r(memWrite_w),
     .jalr_r(jalr_w), .jump_r(jump_w), .branch_r(branch_w), .regWrite_r(regWrite_w),
-    .resultSrc_r(resultSrc_w), .ALUControl_r(ALUControl_w), 
+    .resultSrc_r(resultSrc_w), .ALUControl_r(ALUControl_w),
     .immediate_r(immediate_w), .rs1_val_r(rs1_val_w), .rs2_val_r(rs2_val_w),
     .bgef3_r(instruction_in[14]), .rs1_r(rs1_w), .rs2_r(rs2_w), .rd_r(rd_w),
-    
-    .PC(PC_out), .instruction(instruction_out) , .ALUSrc(ALUSrc_out), .memRead(memRead_out), 
-    .memWrite(memWrite_out), .jalr(jalr_out), .jump(jump_out), .branch(branch_out), .regWrite(regWrite_out),
-    .resultSrc(resultSrc_out), .ALUControl(ALUControl_out), .immediate(immediate_out), 
-    .rs1_val(rs1_val_out), .rs2_val(rs2_val_out), .bgef3(bgef3_out), .rs1(rs1_out), .rs2(rs2_out), .rd(rd_out)
+
+    .instruction(instruction_out), .PC(PC_out),
+    .ALUSrc(ALUSrc_out), .memRead(memRead_out), .memWrite(memWrite_out),
+    .jalr(jalr_out), .jump(jump_out), .branch(branch_out), .regWrite(regWrite_out),
+    .resultSrc(resultSrc_out), .ALUControl(ALUControl_out), .immediate(immediate_out),
+    .rs1_val(rs1_val_out), .rs2_val(rs2_val_out), .bgef3(bgef3_out),
+    .rs1(rs1_out), .rs2(rs2_out), .rd(rd_out)
 );
 
 
@@ -104,7 +108,7 @@ input [2:0] funct3;
 output ALUSrc, memRead, memWrite, jalr, jump, branch, regWrite;
 output [1:0] ALUOp, resultSrc, immSrc;
 
-assign ALUSrc = (opcode == 7'h34)? 1'b0 : 1'b1; //R type = 0, o.w = 1 , this is for ALU
+assign ALUSrc = (opcode == 7'h34 || opcode == 7'h64) ? 1'b0 : 1'b1; //R type = 0, o.w = 1 , this is for ALU
 assign memRead = (opcode == 7'h14 & funct3 == 3'h3)? 1'b1  : 1'b0; //only load needs this
 assign memWrite = (opcode == 7'h24)? 1'b1 : 1'b0; //only sw
 assign jalr = (opcode == 7'h68)? 1'b1 : 1'b0;
@@ -126,26 +130,37 @@ assign immSrc = (opcode == 7'h14 | opcode == 7'h68)? 2'b00 : (opcode == 7'h24)? 
 endmodule
 
 module ALU_control (funct3, funct7, ALUOp, ALUControl);
+    input [2:0] funct3;
+    input [6:0] funct7;
+    input [1:0] ALUOp;
+    output reg [3:0] ALUControl;
 
-input [6:0] funct7;
-input [2:0] funct3;
-input [1:0] ALUOp;
-output [3:0] ALUControl;
-
-assign ALUControl = (ALUOp == 2'b01)? 4'b0 :
-                    (ALUOp == 2'b10)? 4'b1 :
-                    (ALUOp == 2'b11 && funct3 == 3'd0)? 4'b10 :
-                    (ALUOp == 2'b11 && funct3 == 3'd7)? 4'b100 :
-                    (funct3 == 3'd1)? 4'b0 :
-                    (funct3 == 3'd0)? 4'b10 :
-                    (funct3 == 3'd5)? 4'b11 :
-                    (funct3 == 3'd7)? 4'b100 :
-                    (funct3 == 3'd4)? 4'b111 :
-                    (funct3 == 3'd6 & funct7 == 7'h10)? 4'b101 :
-                    4'b110;
-                    
-
-
+    always @(*) begin
+        case (ALUOp)
+            2'b00: begin
+                case ({funct7, funct3})
+                    {7'b0000000, 3'b000}: ALUControl = 4'b0;
+                    {7'b0100000, 3'b000}: ALUControl = 4'b1;
+                    {7'b0000000, 3'b111}: ALUControl = 4'b100;
+                    {7'b0000000, 3'b110}: ALUControl = 4'b010;
+                    {7'b0000000, 3'b100}: ALUControl = 4'b011;
+                    {7'b0000000, 3'b001}: ALUControl = 4'b101;
+                    {7'b0000000, 3'b101}: ALUControl = 4'b110;
+                    {7'b0100000, 3'b101}: ALUControl = 4'b111;
+                    {7'b0000000, 3'b010}: ALUControl = 4'b?;
+                    default: ALUControl = 4'b0;
+                endcase
+            end
+            2'b01: ALUControl = 4'b0;
+            2'b10: ALUControl = 4'b1;
+            2'b11: begin 
+                if (funct3 == 3'b000) ALUControl = 4'b0;
+                else if (funct3 == 3'b111) ALUControl = 4'b100;
+                else ALUControl = 4'b0;
+            end
+            default: ALUControl = 4'b0;
+        endcase
+    end
 endmodule
 
 

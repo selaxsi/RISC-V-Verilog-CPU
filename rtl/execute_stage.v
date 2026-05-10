@@ -21,7 +21,8 @@ module execute_stage(
     input [31:0] ALU_result_mem,
     input [31:0] WB_result_wb,
 
-    output [31:0] ALU_result_out, jump_target_out, jump_target_early_out, instruction_out, PC_out, rs2_val_out,
+    output [31:0] ALU_result_out, jump_target_out, jump_target_early_out, instruction_out, PC_out, rs2_val_out, 
+    output jalr_out,
     output PCSel_out, PCSel_early_out, memRead_out, memWrite_out, regWrite_out, branch_out,
     output [1:0] resultSrc_out,
     output [4:0] rs1_out, rs2_out, rd_out
@@ -64,6 +65,7 @@ assign condition_met = (bgef3)? (!negative || zero) : !zero;
 assign PCSel_w = ((branch_in && condition_met) || jump);
 assign PCSel_early_out = PCSel_w; 
 assign jump_target_early_out = jump_target_w;
+assign jalr_out = jalr;
 
 
 EX_MEM pipe_reg( 

@@ -8,6 +8,9 @@ module cpu_tb;
     wire [31:0] instruction;
     wire [31:0] WB_result;
 
+    integer cycle_count;
+    integer nop_count;
+
     cpu uut (
         .clk(clk),
         .rst(rst),
@@ -24,15 +27,29 @@ module cpu_tb;
 
         clk = 0;
         rst = 1;
+        cycle_count = 0;
+        nop_count = 0;
+
         #10 rst = 0;
 
-        repeat (100) begin
+        forever begin
             @(posedge clk);
-            $display("Time=%0t | PC=%h | Instr=%h | WB=%d",
-                     $time, PC, instruction, WB_result);
-        end
+            cycle_count = cycle_count + 1;
 
-        $finish;
+            $display("Cycle=%0d | Time=%0t | PC=%h | Instr=%h | WB=%h | PCSel=%b | Target=%h",
+                     cycle_count, $time, PC, instruction, WB_result, uut.PCSel_w, uut.next_pc_target_w);
+
+            if (instruction == 32'h00001014) begin
+                nop_count = nop_count + 1;
+            end else begin
+                nop_count = 0;
+            end
+
+            if (nop_count >= 4) begin
+                $display("Program finished after %0d cycles", cycle_count);
+                $finish;
+            end
+        end
     end
 
 endmodule
