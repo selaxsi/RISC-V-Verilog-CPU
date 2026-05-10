@@ -89,9 +89,9 @@ module cpu(
     wire [1:0] forwardA_w, forwardB_w;
 
     forwarding FWD (
-        .rs1_ex(rs1_ex_w), .rs2_ex(rs2_ex_w),
-        .rd_mem(rd_mem_w), .rd_wb(rd_wb_w),
-        .regWrite_mem(regWrite_mem_w), .regWrite_wb(regWrite_wb_w),
+        .rs1_ex(rs1_id_w), .rs2_ex(rs2_id_w), //wire outputs from id/ex
+        .rd_mem(rd_ex_w), .rd_wb(rd_mem_w),
+        .regWrite_mem(regWrite_ex_w), .regWrite_wb(regWrite_mem_w),
         .forwardA(forwardA_w), .forwardB(forwardB_w)
     );
 
@@ -117,7 +117,7 @@ module cpu(
         .memRead_in(memRead_id_w), .memWrite_in(memWrite_id_w), .regWrite_in(regWrite_id_w),
         .resultSrc_in(resultSrc_id_w), .rs1_in(rs1_id_w), .rs2_in(rs2_id_w), .rd_in(rd_id_w),
         .forwardA(forwardA_w), .forwardB(forwardB_w),
-        .ALU_result_mem(ALU_result_mem_w), .WB_result_wb(WB_result_w),
+        .ALU_result_mem(ALU_result_ex_w), .WB_result_wb(WB_result_w),
         .ALU_result_out(ALU_result_ex_w), 
         .instruction_out(instr_ex_w),
         .PC_out(PC_ex_w), .rs2_val_out(rs2_val_ex_w), .PCSel_out(PCSel_ex_w),

@@ -29,6 +29,7 @@ always @(*) begin
         forwardB = 2'b01;
     else
         forwardB = 2'b00;
+
 end
 
 endmodule
