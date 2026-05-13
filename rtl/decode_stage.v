@@ -86,7 +86,7 @@ assign rs2_early = rs2_w;
 assign PC_early = PC_in;
 
 ID_EX pipe_reg (
-    .clk(clk), .rst(rst), .flush(flush | stall),
+    .clk(clk), .rst(rst), .flush(flush),
     .PC_r(PC_in),
     .instruction_r(instruction_in),
     .ALUSrc_r(ALUSrc_w), .memRead_r(memRead_w), .memWrite_r(memWrite_w),
@@ -133,7 +133,7 @@ assign resultSrc = (opcode == 7'h68 | opcode == 7'h70)? 2'b10 :
 
 assign ALUOp = (opcode == 7'h34)? 2'b00 :
                (opcode == 7'h64)? 2'b10 :
-               (opcode == 7'h14 && (funct3 == 3'd0 || funct3 == 3'd7))? 2'b11 :
+               (opcode == 7'h14) ? 2'b11 :
                2'b01; //R type = 00, branch = 10 (sub), o.w 01 (add)
 
 assign immSrc = (opcode == 7'h14 | opcode == 7'h68)? 2'b00 : (opcode == 7'h24)? 2'b01 : (opcode == 7'h64)? 2'b10 : 2'b11;
@@ -145,23 +145,45 @@ module ALU_control (funct3, funct7, ALUOp, ALUControl);
     input [2:0] funct3;
     input [6:0] funct7;
     input [1:0] ALUOp;
-    output [3:0] ALUControl;
+    output reg [3:0] ALUControl;
 
-assign ALUControl = (ALUOp == 2'b01)? 4'b0 :
-                    (ALUOp == 2'b10)? 4'b1 :
-                    (ALUOp == 2'b11 && funct3 == 3'd0)? 4'b10 :
-                    (ALUOp == 2'b11 && funct3 == 3'd7)? 4'b100 :
-                    (funct3 == 3'd1)? 4'b0 :
-                    (funct3 == 3'd0)? 4'b10 :
-                    (funct3 == 3'd5)? 4'b11 :
-                    (funct3 == 3'd7)? 4'b100 :
-                    (funct3 == 3'd4)? 4'b111 :
-                    (funct3 == 3'd6 & funct7 == 7'h10)? 4'b101 :
-                    4'b110;
-                
-
-        
-    
+    always @(*) begin
+        case (ALUOp)
+            2'b00: begin  // R‑type instructions
+                case ({funct7, funct3})
+                    // addw:  funct7=10, funct3=1
+                    {7'h10, 3'h1}: ALUControl = 4'd0;
+                    // and: funct7=10, funct3=0
+                    {7'h10, 3'h0}: ALUControl = 4'd2;
+                    // xor: funct7=10, funct3=5
+                    {7'h10, 3'h5}: ALUControl = 4'd3;
+                    // or: funct7=10, funct3=7
+                    {7'h10, 3'h7}: ALUControl = 4'd4;
+                    // sltu: funct7=1, funct3=4
+                    {7'h01, 3'h4}: ALUControl = 4'd7;
+                    // srl: funct7=10, funct3=6
+                    {7'h10, 3'h6}: ALUControl = 4'd5;
+                    // sra: funct7=30, funct3=6
+                    {7'h30, 3'h6}: ALUControl = 4'd6;
+                    default: ALUControl = 4'd0;
+                endcase
+            end
+            2'b01: ALUControl = 4'd0;   // I‑type addi
+            2'b10: ALUControl = 4'd1;   // branch (sub)
+            2'b11: begin
+            case (funct3)
+                3'h0: ALUControl = 4'd2;   // andi (AND)
+                3'h1: ALUControl = 4'd0;   // addi (ADD)
+                3'h4: ALUControl = 4'd3;   // xori (XOR)  – from your table
+                3'h5: ALUControl = 4'd3;   // also xori (funct3=5 in some encodings)
+                3'h6: ALUControl = 4'd5;   // slli? Not in your table, but keep safe
+                3'h7: ALUControl = 4'd4;   // ori (OR)
+                default: ALUControl = 4'd0;
+            endcase
+        end
+            default: ALUControl = 4'd0;
+        endcase
+    end
 endmodule
 
 

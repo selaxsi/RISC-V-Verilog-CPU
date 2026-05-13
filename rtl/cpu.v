@@ -95,8 +95,8 @@ module cpu(
 
     forwarding FWD (
         .rs1_ex(rs1_id_w), .rs2_ex(rs2_id_w), //wire outputs from id/ex
-        .rd_mem(rd_ex_w), .rd_wb(rd_mem_w), //outputs
-        .regWrite_mem(regWrite_ex_w), .regWrite_wb(regWrite_mem_w),
+        .rd_mem(rd_ex_w), .rd_wb(rd_wb_w), //outputs
+        .regWrite_mem(regWrite_ex_w), .regWrite_wb(regWrite_wb_w),
         .forwardA(forwardA_w), .forwardB(forwardB_w)
     );
 
@@ -155,10 +155,15 @@ module cpu(
 
     // Writeback stage 
     wb_stage WB_STAGE (
-        .ALU_result_in(ALU_result_mem_w), .mem_result_in(mem_result_mem_w),
-        .PC_plus_4_in(PC_plus_4_mem_w), .resultSrc_in(resultSrc_mem_w),
-        .regWrite_in(regWrite_mem_w), .rd_in(rd_mem_w),
-        .WB_result_out(WB_result_w), .regWrite_out(regWrite_wb_w), .rd_out(rd_wb_w)
+        .ALU_result_in(ALU_result_mem_w),
+        .mem_result_in(mem_result_mem_w),
+        .PC_plus_4_in(PC_plus_4_mem_w),
+        .resultSrc_in(resultSrc_mem_w),
+        .regWrite_in(regWrite_mem_w),
+        .rd_in(rd_mem_w),
+        .WB_result_out(WB_result_w),
+        .regWrite_out(regWrite_wb_w),
+        .rd_out(rd_wb_w)
     );
 
     //    // Hazard unit

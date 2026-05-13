@@ -83,24 +83,25 @@ assign PC_early = PC_in;
 assign br_predict = br_predict_hazard;
 
 
-EX_MEM pipe_reg( 
+EX_MEM pipe_reg (
     .clk(clk), .rst(rst),
-    .ALU_result_r(ALU_result_w), 
+    .ALU_result_r(ALU_result_w),
     .instruction_r(instruction_in),
     .jalr_r(jalr),
-    .PC_r(PC_in),                   
-    .PCSel_r(PCSel_w), 
+    .PC_r(PC_in),
+    .PCSel_r(PCSel_w),
     .branch_r(branch_in),
-    .memRead_r(memRead_in), 
-    .memWrite_r(memWrite_in), 
-    .regWrite_r(regWrite_in), 
+    .memRead_r(memRead_in),
+    .memWrite_r(memWrite_in),
+    .regWrite_r(regWrite_in),
     .resultSrc_r(resultSrc_in),
     .rs1_r(rs1_in), .rs2_r(rs2_in), .rd_r(rd_in), .rs2_val_r(rs2_val_forwarded),
-    
-    .ALU_result(ALU_result_out), .instruction(instruction_out), 
-    .PC(PC_out), .PCSel(PCSel_out), .branch(branch_out), .memRead(memRead_out), .memWrite(memWrite_out), 
-    .regWrite(regWrite_out), .resultSrc(resultSrc_out), .rs1(rs1_out), .rs2(rs2_out), 
-    .rd(rd_out), .rs2_val(rs2_val_out), .jalr(jalr_out)
+    .ALU_result(ALU_result_out), .instruction(instruction_out),
+    .PC(PC_out), .PCSel(PCSel_out), .branch(branch_out),
+    .memRead(memRead_out),
+    .memWrite(memWrite_out),
+    .regWrite(regWrite_out), .resultSrc(resultSrc_out),
+    .rs1(rs1_out), .rs2(rs2_out), .rd(rd_out), .rs2_val(rs2_val_out), .jalr(jalr_out)
 );
 
 
@@ -137,15 +138,15 @@ endmodule
 
 
 module EX_MEM(
-input clk, rst,
-input [31:0] ALU_result_r, instruction_r, PC_r, rs2_val_r,
-input PCSel_r, memRead_r, memWrite_r, regWrite_r, branch_r, jalr_r,
-input [1:0] resultSrc_r,
-input [4:0] rs1_r, rs2_r, rd_r,
-output reg [31:0] ALU_result, instruction, PC, rs2_val,
-output reg PCSel, memRead, memWrite, regWrite, branch, jalr,
-output reg [1:0] resultSrc,
-output reg [4:0] rs1, rs2, rd
+    input clk, rst,
+    input [31:0] ALU_result_r, instruction_r, PC_r, rs2_val_r,
+    input PCSel_r, memRead_r, memWrite_r, regWrite_r, branch_r, jalr_r,
+    input [1:0] resultSrc_r,
+    input [4:0] rs1_r, rs2_r, rd_r,
+    output reg [31:0] ALU_result, instruction, PC, rs2_val,
+    output reg PCSel, memRead, memWrite, regWrite, branch, jalr,
+    output reg [1:0] resultSrc,
+    output reg [4:0] rs1, rs2, rd
 );
 
 

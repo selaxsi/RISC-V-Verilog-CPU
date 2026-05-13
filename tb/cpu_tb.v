@@ -34,6 +34,7 @@ module cpu_tb;
 
         forever begin
             @(posedge clk);
+            #1;
             cycle_count = cycle_count + 1;
 
             $display("Cycle=%0d | Time=%0t | PC=%h | Instr=%h | WB=%h | PCSel=%b | Target=%h",
