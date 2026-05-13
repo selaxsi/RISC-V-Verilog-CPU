@@ -59,6 +59,7 @@ mux_3x1 fwd_B_mux(
     .f(rs2_val_forwarded)
 );
 
+//always @(forwardA | forwardB) $display("FWD A %d, FWD b %d", forwardA, forwardB);
 //ALU , Selection of operands for ALU
 mux_2x1 ALU_B_mux(.a(rs2_val_forwarded), .b(immediate), .s(ALUSrc), .f(ALU_in_B)); //rs2 vs immediate for ALU input B
 ALU alu_(.A(ALU_in_A), .B(ALU_in_B), .ALUControl(ALUControl), .result(ALU_result_w), .zero(zero), .negative(negative) );
@@ -124,6 +125,8 @@ assign result = (ALUControl == 4'd0)? A + B :
                 (ALUControl == 4'd5)?  A >> B: 
                 (ALUControl == 4'd6)? $signed($signed(A) >>> B) :
                 (A < B); //ALUControl = 7
+
+//always @(result) $display("ALUCONTROL %d, A %d , B %d, RESULT: %d", ALUControl, A,B ,result);
 
 assign zero = (result == 32'b0);
 assign negative = result[31];

@@ -27,8 +27,7 @@ module ID_tb;
 
     wire [4:0] rs1_if, rs2_if;
     IF_ID pipe_reg (
-        .clk(clk), .rst(rst), .stall(1'b0), .PC_r(PC_in), .instr_r(instruction_in), .PC(PC_r), .instr(instruction_r),
-        .rs1_out(rs1_if), .rs2_out(rs2_if)
+        .clk(clk), .rst(rst), .stall(1'b0), .flush(flush), .PC_r(PC_in), .instr_r(instruction_in), .PC(PC_r), .instr(instruction_r)
     );
     decode_stage uut (
         .clk(clk), .rst(rst), .flush(flush), .stall(1'b0),

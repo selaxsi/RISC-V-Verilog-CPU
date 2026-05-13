@@ -7,7 +7,7 @@ module cpu_tb;
     wire [31:0] PC;
     wire [31:0] instruction;
     wire [31:0] WB_result;
-
+    integer i;
     integer cycle_count;
     integer nop_count;
 
@@ -46,10 +46,25 @@ module cpu_tb;
             end
 
             if (nop_count >= 4) begin
-                $display("Program finished after %0d cycles", cycle_count);
+                $display("Program finished after %0d cycles\n", cycle_count);
+            
+                    $display("\n--- FINAL REGISTER FILE CONTENTS ---");
+
+            for (i = 0; i < 32; i = i + 1) begin
+                $display("x%0d: %d", i, cpu_tb.uut.ID_STAGE.RF.register[i]);
+            end
+
+            $writememh("test/final_register_file.txt", cpu_tb.uut.ID_STAGE.RF.register);
+            $writememh("test/final_memory.txt", cpu_tb.uut.MEM_STAGE.DMEM.memory);
+            $display("Register file contents written to test/final_register_file.txt");
+            $display("Memory contents written to test/final_memory.txt");
+
+
+
                 $finish;
             end
         end
+
     end
 
 endmodule

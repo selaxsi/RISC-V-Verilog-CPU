@@ -3,6 +3,8 @@
 module forwarding(
     input [4:0] rs1_ex,
     input [4:0] rs2_ex,
+    input [4:0] rs1_id,
+    input [4:0] rs2_id,
     input [4:0] rd_mem,
     input [4:0] rd_wb,
     input       regWrite_mem,
@@ -20,6 +22,8 @@ always @(*) begin
         forwardA = 2'b10;
     else if (regWrite_wb && rd_wb != 5'b0 && rd_wb == rs1_ex)
         forwardA = 2'b01;
+    else if (regWrite_id && rd_wb != b'b0 && rd_wb == rs1_id)
+        forwardA = 2'b11;
     else
         forwardA = 2'b00;
 
@@ -27,7 +31,9 @@ always @(*) begin
         forwardB = 2'b10;
     else if (regWrite_wb && rd_wb != 5'b0 && rd_wb == rs2_ex)
         forwardB = 2'b01;
-    else
+    else if (regWrite_id && rd_wb != b'b0 && rd_wb == rs2_id)
+        forwardB = 2'b11;
+    else 
         forwardB = 2'b00;
 
 end

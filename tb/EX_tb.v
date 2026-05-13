@@ -56,11 +56,11 @@ execute_stage EX (
     .regWrite_in(regWrite_r), .resultSrc_in(resultSrc_r), .rs1_in(rs1_r),  .rs2_in(rs2_r),  .rd_in(rd_r),
     .forwardA(2'b00), .forwardB(2'b00),
     .ALU_result_mem(32'd0), .WB_result_wb(32'd0),
-    .ALU_result_out(ALU_result), .jump_target_out(jump_target), .instruction_out(instruction_ex),
+    .ALU_result_out(ALU_result), .instruction_out(instruction_ex),
     .PC_out(PC_ex), .rs2_val_out(rs2_val_ex), .PCSel_out(PCSel),
     .memRead_out(memRead_ex), .memWrite_out(memWrite_ex), .regWrite_out(regWrite_ex),
     .resultSrc_out(resultSrc_ex), .rs1_out(rs1_ex), .rs2_out(rs2_ex), .rd_out(rd_ex),
-    .PCSel_early_out(PCSel_early), .jump_target_early_out(jump_target_early), .branch_out(branch_ex)
+    .PCSel_early_out(PCSel_early), .branch_out(branch_ex)
 );
 
  
@@ -221,8 +221,8 @@ execute_stage EX (
                 @(negedge clk);
         ALUSrc = 1'b0;      // Select rs2
         ALUControl = 4'b0110; //shift right arithmetic (signed)
-        rs1_val = 32'hFFFFFFF6; // This is -10 in two's complement  (either this or rs1_val = -10 works but avoid -32'd10)
-        rs2_val = 32'd1; //should div by 2
+        rs1_val = 32'd80; // This is -10 in two's complement  (either this or rs1_val = -10 works but avoid -32'd10)
+        rs2_val = 32'd4; //should div by 2
         instruction = 32'h00000000;
         // 2 CC for first pipeline and 2nd pipeline register
         repeat (2) @(posedge clk);
@@ -246,7 +246,7 @@ execute_stage EX (
         repeat (2) @(posedge clk);
         
         #1; 
-        $display("--- Testing sra ---");
+        $display("--- Testing sltu ---");
         $display("Time: %t", $time);
         $display("in: rs1 val: %d, rs2 val: %d, ALUSrc: %b, Control: %b", $signed(rs1_val_r), rs2_val_r, ALUSrc_r, ALUControl_r);
         $display("out: ALU_Result %d", $signed(ALU_result));

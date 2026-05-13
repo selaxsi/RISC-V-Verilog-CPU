@@ -85,12 +85,17 @@ module cpu(
         .rs2_early(rs2_early_id_w)
     );
 
+  //always @(rs1_val_id_w)  
+ // ("rs1_val %d, rs2_val %d\n", rs1_val_id_w, rs2_val_id_w);
+ //   always @(ALUSrc_id_w)  $display("ALUSrc %d\n", ALUSrc_id_w);
+
+
     // Forwarding
     wire [1:0] forwardA_w, forwardB_w;
 
     forwarding FWD (
         .rs1_ex(rs1_id_w), .rs2_ex(rs2_id_w), //wire outputs from id/ex
-        .rd_mem(rd_ex_w), .rd_wb(rd_mem_w),
+        .rd_mem(rd_ex_w), .rd_wb(rd_mem_w), //outputs
         .regWrite_mem(regWrite_ex_w), .regWrite_wb(regWrite_mem_w),
         .forwardA(forwardA_w), .forwardB(forwardB_w)
     );

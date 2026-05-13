@@ -103,6 +103,7 @@ ID_EX pipe_reg (
     .rs1(rs1_out), .rs2(rs2_out), .rd(rd_out)
 );
 
+//always @(PC_in) $display("from decode : PC %h : ALUSrc %d", PC_in, ALUSrc_w);
 
 endmodule
 
@@ -144,34 +145,23 @@ module ALU_control (funct3, funct7, ALUOp, ALUControl);
     input [2:0] funct3;
     input [6:0] funct7;
     input [1:0] ALUOp;
-    output reg [3:0] ALUControl;
+    output [3:0] ALUControl;
 
-    always @(*) begin
-        case (ALUOp)
-            2'b00: begin
-                case ({funct7, funct3})
-                    {7'b0000000, 3'b000}: ALUControl = 4'b0;
-                    {7'b0100000, 3'b000}: ALUControl = 4'b1;
-                    {7'b0000000, 3'b111}: ALUControl = 4'b100;
-                    {7'b0000000, 3'b110}: ALUControl = 4'b010;
-                    {7'b0000000, 3'b100}: ALUControl = 4'b011;
-                    {7'b0000000, 3'b001}: ALUControl = 4'b101;
-                    {7'b0000000, 3'b101}: ALUControl = 4'b110;
-                    {7'b0100000, 3'b101}: ALUControl = 4'b111;
-                    {7'b0000000, 3'b010}: ALUControl = 4'b?;
-                    default: ALUControl = 4'b0;
-                endcase
-            end
-            2'b01: ALUControl = 4'b0;
-            2'b10: ALUControl = 4'b1;
-            2'b11: begin 
-                if (funct3 == 3'b000) ALUControl = 4'b0;
-                else if (funct3 == 3'b111) ALUControl = 4'b100;
-                else ALUControl = 4'b0;
-            end
-            default: ALUControl = 4'b0;
-        endcase
-    end
+assign ALUControl = (ALUOp == 2'b01)? 4'b0 :
+                    (ALUOp == 2'b10)? 4'b1 :
+                    (ALUOp == 2'b11 && funct3 == 3'd0)? 4'b10 :
+                    (ALUOp == 2'b11 && funct3 == 3'd7)? 4'b100 :
+                    (funct3 == 3'd1)? 4'b0 :
+                    (funct3 == 3'd0)? 4'b10 :
+                    (funct3 == 3'd5)? 4'b11 :
+                    (funct3 == 3'd7)? 4'b100 :
+                    (funct3 == 3'd4)? 4'b111 :
+                    (funct3 == 3'd6 & funct7 == 7'h10)? 4'b101 :
+                    4'b110;
+                
+
+        
+    
 endmodule
 
 
@@ -210,10 +200,11 @@ rs1_val, rs2_val
  
             if (regWrite & rd !=5'b0) begin
             register[rd] <= WB_result;
+            $display("---in ID RF: rd %d, WB_result %d, time %t", rd, WB_result, $time);
             end
     end
 
-    always @ (negedge clk)
+    always @ (*)
     begin
      rs1_val = (rst==1'b1) ? 32'd0 : register[rs1];
      rs2_val = (rst==1'b1) ? 32'd0 : register[rs2];
@@ -294,7 +285,8 @@ always @(posedge clk or posedge rst) begin
             rs1 <= rs1_r;
             rs2 <= rs2_r;
             rd <= rd_r;
-            
+                        $display("---in IDEX--- : PC %h, rs2_val %d, time %t", PC, rs2_val, $time);
+
         end
     end
 
