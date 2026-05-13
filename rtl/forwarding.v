@@ -11,7 +11,9 @@ module forwarding(
     input       regWrite_wb,
 
     output reg [1:0] forwardA,
-    output reg [1:0] forwardB 
+    output reg [1:0] forwardB,
+    output reg forwardIDA,
+    output reg forwardIDB
 );
 
 
@@ -22,8 +24,6 @@ always @(*) begin
         forwardA = 2'b10;
     else if (regWrite_wb && rd_wb != 5'b0 && rd_wb == rs1_ex)
         forwardA = 2'b01;
-    else if (regWrite_id && rd_wb != b'b0 && rd_wb == rs1_id)
-        forwardA = 2'b11;
     else
         forwardA = 2'b00;
 
@@ -31,10 +31,18 @@ always @(*) begin
         forwardB = 2'b10;
     else if (regWrite_wb && rd_wb != 5'b0 && rd_wb == rs2_ex)
         forwardB = 2'b01;
-    else if (regWrite_id && rd_wb != b'b0 && rd_wb == rs2_id)
-        forwardB = 2'b11;
     else 
         forwardB = 2'b00;
+
+    if (regWrite_wb && rd_wb != 0 && rd_wb == rs1_id)
+    forwardIDA = 1'b1; 
+    else
+    forwardIDA = 1'b0;
+
+        if (regWrite_wb && rd_wb != 0 && rd_wb == rs2_id)
+    forwardIDB = 1'b1; 
+    else
+    forwardIDB = 1'b0;
 
 end
 

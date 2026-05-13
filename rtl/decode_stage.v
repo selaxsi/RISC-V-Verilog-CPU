@@ -13,6 +13,10 @@ module decode_stage(
 input flush, stall,
 input [4:0] rd_in, //for writing to reg from prev instruction
 input [31:0] instruction_in, PC_in, WB_result,
+//forwarding input
+    input  forwardA,
+    input  forwardB,
+    input [31:0] WB_result_wb,
 
 output [31:0] PC_out, instruction_out,
 output ALUSrc_out, memRead_out, memWrite_out, jalr_out, jump_out, branch_out, regWrite_out,
@@ -85,6 +89,11 @@ assign rs1_early = rs1_w;
 assign rs2_early = rs2_w;
 assign PC_early = PC_in;
 
+wire [31:0] rs2_val_idex, rs1_val_idex;
+ assign rs1_val_idex = (forwardA)? WB_result_wb : rs1_val_w;
+ assign rs2_val_idex =  (forwardB)? WB_result_wb : rs2_val_w;
+
+
 ID_EX pipe_reg (
     .clk(clk), .rst(rst), .flush(flush),
     .PC_r(PC_in),
@@ -92,7 +101,7 @@ ID_EX pipe_reg (
     .ALUSrc_r(ALUSrc_w), .memRead_r(memRead_w), .memWrite_r(memWrite_w),
     .jalr_r(jalr_w), .jump_r(jump_w), .branch_r(branch_w), .regWrite_r(regWrite_w),
     .resultSrc_r(resultSrc_w), .ALUControl_r(ALUControl_w),
-    .immediate_r(immediate_w), .rs1_val_r(rs1_val_w), .rs2_val_r(rs2_val_w),
+    .immediate_r(immediate_w), .rs1_val_r(rs1_val_idex), .rs2_val_r(rs2_val_idex),
     .bgef3_r(instruction_in[14]), .rs1_r(rs1_w), .rs2_r(rs2_w), .rd_r(rd_w),
 
     .instruction(instruction_out), .PC(PC_out),
@@ -176,7 +185,7 @@ module ALU_control (funct3, funct7, ALUOp, ALUControl);
                 3'h1: ALUControl = 4'd0;   // addi (ADD)
                 3'h4: ALUControl = 4'd3;   // xori (XOR)  – from your table
                 3'h5: ALUControl = 4'd3;   // also xori (funct3=5 in some encodings)
-                3'h6: ALUControl = 4'd5;   // slli? Not in your table, but keep safe
+                3'h6: ALUControl = 4'd5;   
                 3'h7: ALUControl = 4'd4;   // ori (OR)
                 default: ALUControl = 4'd0;
             endcase
@@ -226,7 +235,7 @@ rs1_val, rs2_val
             end
     end
 
-    always @ (*)
+    always @ (negedge clk)
     begin
      rs1_val = (rst==1'b1) ? 32'd0 : register[rs1];
      rs2_val = (rst==1'b1) ? 32'd0 : register[rs2];

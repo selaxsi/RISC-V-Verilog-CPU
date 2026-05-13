@@ -27,6 +27,10 @@ module cpu(
 
     assign PC_fetch_out   = PC_fetch_w;
     assign instr_fetch_out = instr_fetch_w;
+    wire [4:0] rs1_if_w, rs2_if_w;
+    assign rs1_if_w = instr_fetch_w[19:15];
+    assign rs2_if_w = instr_fetch_w[24:20];
+
 
        // Decode stage
     wire [31:0] PC_id_w, instr_id_w;
@@ -57,6 +61,9 @@ module cpu(
         .WB_result(WB_result_w),
         .rd_in(rd_wb_w),
 
+        .forwardA(forwardIDA_w), .forwardB(forwardIDB_w),
+        .WB_result_wb(WB_result_w),
+
         .PC_out(PC_id_w),
         .instruction_out(instr_id_w),
         .ALUSrc_out(ALUSrc_id_w),
@@ -85,19 +92,19 @@ module cpu(
         .rs2_early(rs2_early_id_w)
     );
 
-  //always @(rs1_val_id_w)  
- // ("rs1_val %d, rs2_val %d\n", rs1_val_id_w, rs2_val_id_w);
- //   always @(ALUSrc_id_w)  $display("ALUSrc %d\n", ALUSrc_id_w);
 
 
     // Forwarding
     wire [1:0] forwardA_w, forwardB_w;
+    wire forwardIDA_w, forwardIDB_w;
 
     forwarding FWD (
         .rs1_ex(rs1_id_w), .rs2_ex(rs2_id_w), //wire outputs from id/ex
+        .rs1_id(rs1_if_w), .rs2_id(rs2_if_w),
         .rd_mem(rd_ex_w), .rd_wb(rd_wb_w), //outputs
         .regWrite_mem(regWrite_ex_w), .regWrite_wb(regWrite_wb_w),
-        .forwardA(forwardA_w), .forwardB(forwardB_w)
+        .forwardA(forwardA_w), .forwardB(forwardB_w), 
+        .forwardIDA(forwardIDA_w), .forwardIDB(forwardIDB_w)
     );
 
     // Execute stage
