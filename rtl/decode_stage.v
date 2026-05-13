@@ -231,7 +231,7 @@ rs1_val, rs2_val
  
             if (regWrite & rd !=5'b0) begin
             register[rd] <= WB_result;
-            $display("---in ID RF: rd %d, WB_result %d, time %t", rd, WB_result, $time);
+            //$display("---in ID RF: rd %d, WB_result %d, time %t", rd, WB_result, $time);
             end
     end
 
@@ -316,7 +316,7 @@ always @(posedge clk or posedge rst) begin
             rs1 <= rs1_r;
             rs2 <= rs2_r;
             rd <= rd_r;
-                        $display("---in IDEX--- : PC %h, rs2_val %d, time %t", PC, rs2_val, $time);
+                        //$display("---in IDEX--- : PC %h, rs2_val %d, time %t", PC, rs2_val, $time);
 
         end
     end

@@ -27,9 +27,6 @@ module cpu(
 
     assign PC_fetch_out   = PC_fetch_w;
     assign instr_fetch_out = instr_fetch_w;
-    wire [4:0] rs1_if_w, rs2_if_w;
-    assign rs1_if_w = instr_fetch_w[19:15];
-    assign rs2_if_w = instr_fetch_w[24:20];
 
 
        // Decode stage
@@ -100,7 +97,7 @@ module cpu(
 
     forwarding FWD (
         .rs1_ex(rs1_id_w), .rs2_ex(rs2_id_w), //wire outputs from id/ex
-        .rs1_id(rs1_if_w), .rs2_id(rs2_if_w),
+        .rs1_id(rs1_early_id_w), .rs2_id(rs2_early_id_w), 
         .rd_mem(rd_ex_w), .rd_wb(rd_wb_w), //outputs
         .regWrite_mem(regWrite_ex_w), .regWrite_wb(regWrite_wb_w),
         .forwardA(forwardA_w), .forwardB(forwardB_w), 
@@ -175,17 +172,8 @@ module cpu(
 
     //    // Hazard unit
     wire br_predict_h_w;
-    // reg  br_predict_reg;
-
-    // always @(posedge clk or posedge rst) begin
-    //     if (rst)
-    //         br_predict_reg <= 1'b0;
-    //     else
-    //         br_predict_reg <= br_predict_w;
-    // end
 
 
-   
 
     hazard HDU (
         .clk(clk),
@@ -203,7 +191,7 @@ module cpu(
         .PC_ex(PC_early_ex_w),
         .ALU_result_ex(ALU_result_early_ex_w),
         .imm_ex(immediate_id_w),
-        .rd_ex(rd_ex_w),
+        .rd_ex(rd_early_ex_w),
         .rs1_id(rs1_early_id_w),
         .rs2_id(rs2_early_id_w),
         .IFID_stall(IFID_stall_w),

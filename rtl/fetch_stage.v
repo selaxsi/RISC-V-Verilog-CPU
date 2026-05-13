@@ -58,7 +58,7 @@ initial
   for ( i = 0; i<16384; i = i+1)
     temp_mem[i] = 32'h00001014; // NOP = addiw x0, x0, 0
 
-  $readmemb("test/CPU_TB/arithmetic_bin.txt", temp_mem);
+  $readmemb("test/CPU_TB/jumps_bin.txt", temp_mem);
 
   for ( i = 0; i<16384; i = i+1) begin
     memory[i*4]   = temp_mem[i][7:0];
@@ -68,7 +68,6 @@ initial
   end
  end
 
-always @(PC) $display("-- IN FETCH IM -- time %t, PC %h", $time, PC);
 assign instruction =  {memory[PC+3], memory[PC+2], memory[PC+1], memory[PC]}; 
 
 
@@ -107,7 +106,6 @@ endmodule
                 PC <= PC_r;
                 instr <= instr_r;
             end
-    $display("-- IFID -- time %t, PC %h", $time, PC);
 
         end
     endmodule

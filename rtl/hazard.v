@@ -73,6 +73,7 @@ always @(*) begin
     // Load‑use hazard: stall
     else if (memRead_ex && rd_ex != 5'b0 &&
              (rd_ex == rs1_id || rd_ex == rs2_id)) begin
+        $display("--------------- time %t : load use detected -- !! -- !! ", $time);
         IFID_stall = 1'b1;
     end
 end
