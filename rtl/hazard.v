@@ -73,7 +73,6 @@ always @(*) begin
     // Load‑use hazard: stall
     else if (memRead_ex && rd_ex != 5'b0 &&
              (rd_ex == rs1_id || rd_ex == rs2_id)) begin
-        $display("--------------- time %t : load use detected -- !! -- !! ", $time);
         IFID_stall = 1'b1;
     end
 end
@@ -96,8 +95,12 @@ initial begin
         BHT[i] = 2'b00;
 end
 
-always @(posedge clk) begin
-    if (update) begin
+always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            for (i = 0; i < 64; i = i + 1)
+            BHT[i] = 2'b00;
+    end
+    else if (update) begin
         if (result_ex)
             BHT[tag_ex] <= (BHT[tag_ex] != 2'b11) ? (BHT[tag_ex] + 1'b1) : 2'b11;
         else

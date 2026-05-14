@@ -19,9 +19,4 @@ module wb_stage(
     assign regWrite_out = regWrite_in;
     assign rd_out = rd_in;
 
-    // always @(*) begin
-    //  //   $display("WB_DEBUG: rd=%d, src=%d, ALU=%h, mem=%h, PC=%h, out=%h", 
-    //              rd_in, resultSrc_in, ALU_result_in, mem_result_in, PC_plus_4_in, selected);
-    // end
-
 endmodule

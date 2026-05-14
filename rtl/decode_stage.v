@@ -112,7 +112,7 @@ ID_EX pipe_reg (
     .rs1(rs1_out), .rs2(rs2_out), .rd(rd_out)
 );
 
-//always @(PC_in) $display("from decode : PC %h : ALUSrc %d", PC_in, ALUSrc_w);
+
 
 endmodule
 
@@ -143,7 +143,7 @@ assign resultSrc = (opcode == 7'h68 | opcode == 7'h70)? 2'b10 :
 assign ALUOp = (opcode == 7'h34)? 2'b00 :
                (opcode == 7'h64)? 2'b10 :
                (opcode == 7'h14) ? 2'b11 :
-               2'b01; //R type = 00, branch = 10 (sub), o.w 01 (add)
+               2'b01; //R type = 00, branch = 10 (sub), i type = 11, o.w 01 (add) (jalr,sw,jal)
 
 assign immSrc = (opcode == 7'h14 | opcode == 7'h68)? 2'b00 : (opcode == 7'h24)? 2'b01 : (opcode == 7'h64)? 2'b10 : 2'b11;
 
@@ -159,7 +159,7 @@ module ALU_control (funct3, funct7, ALUOp, ALUControl);
     always @(*) begin
         case (ALUOp)
             2'b00: begin  // R‑type instructions
-                case ({funct7, funct3})
+                case ({funct7, funct3}) 
                     // addw:  funct7=10, funct3=1
                     {7'h10, 3'h1}: ALUControl = 4'd0;
                     // and: funct7=10, funct3=0
@@ -177,15 +177,13 @@ module ALU_control (funct3, funct7, ALUOp, ALUControl);
                     default: ALUControl = 4'd0;
                 endcase
             end
-            2'b01: ALUControl = 4'd0;   // I‑type addi
+            2'b01: ALUControl = 4'd0;   // jalr, sw, jal
             2'b10: ALUControl = 4'd1;   // branch (sub)
-            2'b11: begin
+            2'b11: begin //I type
             case (funct3)
                 3'h0: ALUControl = 4'd2;   // andi (AND)
                 3'h1: ALUControl = 4'd0;   // addi (ADD)
-                3'h4: ALUControl = 4'd3;   // xori (XOR)  – from your table
-                3'h5: ALUControl = 4'd3;   // also xori (funct3=5 in some encodings)
-                3'h6: ALUControl = 4'd5;   
+                3'h3: ALUControl = 4'd0;   // lw (ADD)
                 3'h7: ALUControl = 4'd4;   // ori (OR)
                 default: ALUControl = 4'd0;
             endcase
@@ -231,7 +229,6 @@ rs1_val, rs2_val
  
             if (regWrite & rd !=5'b0) begin
             register[rd] <= WB_result;
-            //$display("---in ID RF: rd %d, WB_result %d, time %t", rd, WB_result, $time);
             end
     end
 
@@ -316,8 +313,6 @@ always @(posedge clk or posedge rst) begin
             rs1 <= rs1_r;
             rs2 <= rs2_r;
             rd <= rd_r;
-                        //$display("---in IDEX--- : PC %h, rs2_val %d, time %t", PC, rs2_val, $time);
-
         end
     end
 

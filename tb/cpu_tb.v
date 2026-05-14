@@ -45,7 +45,7 @@ module cpu_tb;
             end else begin
                 nop_count = 0;
             end
-
+            
             if (nop_count >= 4) begin
                 $display("Program finished after %0d cycles\n", cycle_count);
             
@@ -59,8 +59,6 @@ module cpu_tb;
             $writememh("test/final_memory.txt", cpu_tb.uut.MEM_STAGE.DMEM.memory);
             $display("Register file contents written to test/final_register_file.txt");
             $display("Memory contents written to test/final_memory.txt");
-
-
 
                 $finish;
             end

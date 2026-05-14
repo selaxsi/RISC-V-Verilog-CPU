@@ -69,7 +69,7 @@ cpu:
 	$(VERILOG) -o $(SIM_DIR)/cpu.out $(RTL_DIR)/*.v $(TB_DIR)/cpu_tb.v
 	$(SIM) $(SIM_DIR)/cpu.out
 	mv cpu_tb.vcd $(SIM_DIR)/ 
-#$(VIEWER) $(SIM_DIR)/cpu_tb.vcd &
+	$(VIEWER) $(SIM_DIR)/cpu_tb.vcd &
 
 # 7. Forwarding Unit
 forward:
