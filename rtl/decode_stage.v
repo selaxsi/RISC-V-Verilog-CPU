@@ -86,7 +86,7 @@ assign branch_early = branch_w;
 assign jalr_early = jalr_w;
 assign jump_early = jump_w;
 assign rs1_early = rs1_w;
-assign rs2_early = rs2_w;
+assign rs2_early = (instruction_in[6:0] == 7'h24 ||instruction_in[6:0] == 7'h64 || instruction_in[6:0] == 7'h34)? rs2_w : 5'b0;
 assign PC_early = PC_in;
 
 wire [31:0] rs2_val_idex, rs1_val_idex;
