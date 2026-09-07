@@ -90,7 +90,7 @@ module branch_history_table(
 reg [1:0] BHT [0:63];
 integer i;
 
-initial begin
+always @(posedge rst) begin
     for (i = 0; i < 64; i = i + 1)
         BHT[i] = 2'b00;
 end

@@ -15,8 +15,7 @@ module fetch_stage(
 
     wire [31:0] PC_plus_4;
     wire [31:0] next_PC_val;
-    wire [31:0] PC_w, instruction_w;
-
+    wire [31:0] PC_w, instr_w;
    adder adder_4(.a(PC_w), .b(32'd4), .f(PC_plus_4));
 
     mux_2x1 mux(.a(PC_plus_4), .b(jump_target), .s(PCSel), .f(next_PC_val));
@@ -31,53 +30,69 @@ module fetch_stage(
 
     instruction_memory IM (
         .PC(PC_w),
-        .instruction(instruction_w)
+        .instruction(instruction_out),
+        .rst(rst), .clk(clk), .stall(stall), .flush(flush)
     );
 
     IF_ID IFID(
             .clk(clk), .rst(rst), .stall(stall), .flush(flush),
-            .PC_r(PC_w), .instr_r(instruction_w),
-            .PC(PC_out), .instr(instruction_out)
+            .PC_r(PC_w),
+            .PC(PC_out)
         );
+ 
     endmodule
 
-module instruction_memory(PC, instruction); 
-
-input [31:0] PC;
-output [31:0] instruction;
-
-reg [31:0] temp_mem [0:16383]; // 16k words = 64k bytes
-reg [7:0] memory [0:65535]; //64k x 1byte, enough for 16k instructions
 
 
-integer i;
 
-initial
- begin
-  // fill everything with NOP first so uninitialized slots don't go X
-  for ( i = 0; i<16384; i = i+1)
-    temp_mem[i] = 32'h00001014; // NOP = addiw x0, x0, 0
+    module instruction_memory(PC, instruction, rst, stall, flush, clk); 
 
-  $readmemb("test/CPU_TB/jumps_bin.txt", temp_mem);
+    input [31:0] PC;
+    input rst, stall, flush, clk;
+    output reg [31:0] instruction;
 
-  for ( i = 0; i<16384; i = i+1) begin
-    memory[i*4]   = temp_mem[i][7:0];
-    memory[i*4+1] = temp_mem[i][15:8];
-    memory[i*4+2] = temp_mem[i][23:16];
-    memory[i*4+3] = temp_mem[i][31:24];
-  end
- end
+  
 
-assign instruction =  {memory[PC+3], memory[PC+2], memory[PC+1], memory[PC]}; 
+    reg [31:0] memory [0:16383]; // 16k words = 64k bytes 
+
+    // integer i;
+    // initial
+    // begin
+    // // fill everything with NOP first so uninitialized slots don't go X
+    // for ( i = 0; i<16384; i = i+1)
+    //     memory[i] = 32'h00001014; // NOP = addiw x0, x0, 0
+
+    // $readmemb("test/CPU_TB/loop_bin.txt", memory); /// *** not synthesizable (????)    
+    // end
 
 
-endmodule
+    always @(posedge clk or posedge rst) begin
+
+    if (rst == 1'b1 || flush == 1'b1 ) instruction <= 32'b0;
+    else if (!stall) instruction <=  memory[PC[15:2]];
+    end
+    
+
+    task load_program(input reg[40*8:1] filename);
+        integer i;
+        begin
+            for (i = 0; i < 16383; i = i + 1) 
+                memory[i] = 32'h00001014; // NOP = addiw x0, x0, 0
+
+            $readmemb(filename, memory);
+        end
+    endtask
+
+    endmodule
+
+
 
 
     module program_counter( clk, PC_mux_output, rst, stall, PC);  
     input clk, rst, stall;
     input [31:0]PC_mux_output;
     output reg [31:0]PC;
+
     always @(posedge clk)
     begin
         if (rst == 1'b1) PC <= 32'b0;
@@ -85,26 +100,26 @@ endmodule
     end
     endmodule
 
+
+
     module IF_ID(
     input wire clk, rst, stall, flush,
-    input wire [31:0] PC_r , instr_r,
-    output reg [31:0] instr, PC
+    input wire [31:0] PC_r ,
+    output reg [31:0]  PC
 
       );
         always @(posedge clk or posedge rst) begin
             if (rst) begin
                 PC <= 32'b0; 
-                instr <= 32'b0; 
             end
 
             else if (flush) begin
                 PC <= 32'b0;
-                instr <= 32'b0;
+
             end
 
             else if (!stall) begin
                 PC <= PC_r;
-                instr <= instr_r;
             end
 
         end

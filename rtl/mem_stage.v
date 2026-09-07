@@ -62,7 +62,7 @@ module mem_stage(
     assign PC_plus_4_w = PC_in + 32'd4;
 
     data_memory DMEM (
-        .clk(clk),
+        .clk(clk), .rst(rst),
         .memRead(memRead_in),
         .memWrite(memWrite_in),
         .ALU_result(ALU_result_in),

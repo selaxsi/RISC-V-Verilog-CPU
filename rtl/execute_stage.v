@@ -68,7 +68,7 @@ ALU alu_(.A(ALU_in_A), .B(ALU_in_B), .ALUControl(ALUControl), .result(ALU_result
 //Branch and jump logic  
 
 assign condition_met = (bgef3)? (!negative || zero) : !zero;
-assign PCSel_w = ((branch_in && condition_met) || jump);
+assign PCSel_w = ((branch_in && condition_met) || jump); // *** critical path
 
 assign PCSel_early_out = PCSel_w; 
 assign jalr_early = jalr;

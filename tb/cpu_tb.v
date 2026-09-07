@@ -30,6 +30,8 @@ module cpu_tb;
         cycle_count = 0;
         nop_count = 0;
 
+        cpu_tb.uut.IF_STAGE.IM.load_program("test/bin/memory.txt");
+
         #10 rst = 0;
 
         forever begin
@@ -46,7 +48,7 @@ module cpu_tb;
                 nop_count = 0;
             end
             
-            if (nop_count >= 4) begin
+            if (nop_count >= 4 ) begin
                 $display("Program finished after %0d cycles\n", cycle_count);
             
                     $display("\n--- FINAL REGISTER FILE CONTENTS ---");

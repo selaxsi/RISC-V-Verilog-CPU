@@ -1,7 +1,7 @@
 `default_nettype none
 
 module data_memory(
-    input clk,
+    input clk, rst,
     input memRead, memWrite,
     input [31:0] ALU_result, rs2_val,
     output reg [31:0] mem_result
@@ -10,7 +10,7 @@ module data_memory(
     reg [31:0] memory [0:1023];
 
     integer i;
-    initial begin
+    always @(posedge rst) begin
         for (i = 0; i < 1024; i = i + 1)
             memory[i] = 32'h0;
     end

@@ -85,6 +85,13 @@ hazard:
 	$(SIM) $(SIM_DIR)/hazard.out
 	mv hazard_tb.vcd $(SIM_DIR)/ 
 
+# self checking regression with 10 test cases
+check:
+	mkdir -p $(SIM_DIR)
+	$(VERILOG) -o $(SIM_DIR)/cpu.out $(RTL_DIR)/*.v $(TB_DIR)/cpu_tb_check.v
+	$(SIM) $(SIM_DIR)/cpu.out
+	mv cpu_tb_check.vcd $(SIM_DIR)/ 
+	$(VIEWER) $(SIM_DIR)/cpu_tb_check.vcd &
 
 # Clean sim folder
 clean:

@@ -239,7 +239,7 @@ rs1_val, rs2_val
     end
 
   integer i;
-    initial begin
+    always @(posedge rst) begin
         for (i = 0; i < 32; i = i + 1) register[i] = 32'h0;
     end
 
